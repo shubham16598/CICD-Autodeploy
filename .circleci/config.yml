@@ -12,7 +12,6 @@ jobs:
             echo "First Job"
   # The Frontend job
   frontend-test:
-    working_directory: ~/frontend
     docker:
       - image: circleci/node:10-browsers
     steps:
@@ -29,16 +28,18 @@ jobs:
       # Install project dependencies
       - run:
           name: Install local dependencies
-          command: npm install
+          command: cd frontend && npm install
       # Cache local dependencies if they don't exist
       - save_cache:
           key: v1-dependencies-{{ checksum "package-lock.json" }}
           paths:
             - node_modules
       # Test the source code
+      - run: cd frontend && pwd && ls
+
       - run:
           name: Testing
-          command: npm run test
+          command: cd frontend && npm run test
 
 workflows:
   default:
