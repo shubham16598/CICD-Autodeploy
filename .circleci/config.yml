@@ -72,10 +72,14 @@ workflows:
     jobs:
       - hello-world
       - frontend-lint:
-          requires: hello-world
+          requires:
+            - hello-world
       - frontend-test:
-          requires: frontend-lint
+          requires:
+            - frontend-lint
       - backend-lint:
-          requires: frontend-test
+          requires:
+            - frontend-test
       - backend-test:
-          requires: backend-lint
+          requires:
+            - backend-lint
