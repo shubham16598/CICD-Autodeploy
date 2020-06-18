@@ -9,7 +9,7 @@ jobs:
       - run:
           name: Say Hello
           command: |
-            echo "Hello World"
+            echo "First Job"
 
 workflows:
   default:
