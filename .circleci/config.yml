@@ -11,38 +11,71 @@ jobs:
           command: |
             echo "First Job"
   # The Frontend job
+  frontend-lint:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      # Install project dependencies
+      - run:
+          name: Install local dependencies
+          command: cd frontend && npm install
+
+      - run:
+          name: Testing
+          command: cd frontend && npm run lint
+
   frontend-test:
     docker:
       - image: circleci/node:10-browsers
     steps:
       - checkout
-      # Log the current branch
-      - run:
-          name: Show current branch
-          command: echo ${CIRCLE_BRANCH}
-      # Restore local dependencies from cache
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package-lock.json" }}
-            - v1-dependencies-
       # Install project dependencies
       - run:
           name: Install local dependencies
           command: cd frontend && npm install
-      # Cache local dependencies if they don't exist
-      - save_cache:
-          key: v1-dependencies-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
-      # Test the source code
-      - run: cd frontend && pwd && ls
 
       - run:
           name: Testing
           command: cd frontend && npm run test
 
+  backend-lint:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      # Install project dependencies
+      - run:
+          name: Install local dependencies
+          command: cd backend && npm install
+
+      - run:
+          name: Testing
+          command: cd backend && npm run lint
+
+  backend-test:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      # Install project dependencies
+      - run:
+          name: Install local dependencies
+          command: cd backend && npm install
+
+      - run:
+          name: Testing
+          command: cd backend && npm run test
+
 workflows:
   default:
     jobs:
       - hello-world
-      - frontend-test
+      - frontend-lint:
+          requires: hello-world
+      - frontend-test:
+          requires: frontend-lint
+      - backend-lint:
+          requires: frontend-test
+      - backend-test:
+          requires: backend-lint
