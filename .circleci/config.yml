@@ -10,8 +10,38 @@ jobs:
           name: Say Hello
           command: |
             echo "First Job"
+  # The Frontend job
+  frontend-test:
+    working_directory: ~/frontend
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      # Log the current branch
+      - run:
+          name: Show current branch
+          command: echo ${CIRCLE_BRANCH}
+      # Restore local dependencies from cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            - v1-dependencies-
+      # Install project dependencies
+      - run:
+          name: Install local dependencies
+          command: npm install
+      # Cache local dependencies if they don't exist
+      - save_cache:
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+      # Test the source code
+      - run:
+          name: Testing
+          command: npm run test
 
 workflows:
   default:
     jobs:
       - hello-world
+      - frontend-test
