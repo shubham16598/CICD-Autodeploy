@@ -78,7 +78,7 @@ export class Table extends Component<Table.Props, Table.State> {
       showActiveEmployees: true,
     });
     this.props.onToggleArchive(this.state.showActiveEmployees);
-  }
+  };
 
   toggleArchiveTab = (e: any) => {
     e.preventDefault();
@@ -87,16 +87,14 @@ export class Table extends Component<Table.Props, Table.State> {
       showActiveEmployees: false,
     });
     this.props.onToggleArchive(this.state.showActiveEmployees);
-  }
+  };
 
   render() {
     const { data, columns, loading, defaultSorted } = this.props;
     return (
       <div
         className={`
-        ${appstyle['g-content-fluid']} ${appstyle['table-container']} ${
-          appstyle['grid-container']
-        } ${appstyle.fluid} ${appstyle['grid-padding-x']} ${appstyle.full}
+        ${appstyle['g-content-fluid']} ${appstyle['table-container']} ${appstyle['grid-container']} ${appstyle.fluid} ${appstyle['grid-padding-x']} ${appstyle.full}
         `}
         style={this.textStyle}
       >
@@ -108,17 +106,15 @@ export class Table extends Component<Table.Props, Table.State> {
             ${appstyle['table-controls']}`}
           >
             <div
-              className={`${appstyle.cell} ${appstyle['medium-12']} ${
-                appstyle['small-12']
-              } ${appstyle['large-8']}`}
+              className={`${appstyle.cell} ${appstyle['medium-12']} ${appstyle['small-12']} ${appstyle['large-8']}`}
             >
-              <ul className={`${appstyle.tabs}`} data-tabs='emp-list-control'>
+              <ul className={`${appstyle.tabs}`} data-tabs="emp-list-control">
                 <li
                   className={`${appstyle['tabs-title']} ${
                     appstyle[this.state.showActiveEmployees ? 'is-active' : '']
                   }`}
                 >
-                  <a href='#' onClick={this.toggleTab}>
+                  <a href="#" onClick={this.toggleTab}>
                     Active
                   </a>
                 </li>
@@ -127,7 +123,7 @@ export class Table extends Component<Table.Props, Table.State> {
                     appstyle[this.state.showActiveEmployees ? '' : 'is-active']
                   }`}
                 >
-                  <a href='#' onClick={this.toggleArchiveTab}>
+                  <a href="#" onClick={this.toggleArchiveTab}>
                     Archived
                   </a>
                 </li>
@@ -138,8 +134,8 @@ export class Table extends Component<Table.Props, Table.State> {
                   style={{ marginBottom: 0 }}
                 >
                   <input
-                    type='text'
-                    placeholder='Type to filter...'
+                    type="text"
+                    placeholder="Type to filter..."
                     value={this.state.searchText}
                     onChange={this.handleInputChange}
                   />
@@ -154,9 +150,7 @@ export class Table extends Component<Table.Props, Table.State> {
               </div>
             </div>
             <div
-              className={`${appstyle.cell} ${appstyle['medium-12']} ${
-                appstyle['small-12']
-              } ${appstyle['large-4']} ${appstyle['text-right']}`}
+              className={`${appstyle.cell} ${appstyle['medium-12']} ${appstyle['small-12']} ${appstyle['large-4']} ${appstyle['text-right']}`}
             />
           </div>
           <div className={`${appstyle['g-main']}`}>
@@ -170,7 +164,7 @@ export class Table extends Component<Table.Props, Table.State> {
                 ...this.getHeadersStyle(),
               })}
               columns={columns}
-              noDataText=''
+              noDataText=""
               showPagination={false}
               loading={loading}
               defaultSorted={defaultSorted}
