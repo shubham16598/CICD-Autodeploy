@@ -23,7 +23,7 @@ jobs:
 
       - run:
           name: Testing
-          command: cd frontend && npm run lint
+          command: cd frontend && npm run build
 
   frontend-test:
     docker:
@@ -51,7 +51,7 @@ jobs:
 
       - run:
           name: Testing
-          command: cd backend && npm run lint
+          command: cd backend && npm run build
 
   backend-test:
     docker:
@@ -66,6 +66,33 @@ jobs:
       - run:
           name: Testing
           command: cd backend && npm run test
+  audit-check-frontend:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      # Install project dependencies
+      - run:
+          name: Install local dependencies
+          command: cd frontend && npm install
+
+      - run:
+          name: Testing
+          command: cd frontend && npm audit --audit-level=critical
+
+  audit-check-backend:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      # Install project dependencies
+      - run:
+          name: Install local dependencies
+          command: cd backend && npm install
+
+      - run:
+          name: Testing
+          command: cd backend && npm audit --audit-level=critical
 
 workflows:
   default:
@@ -83,3 +110,9 @@ workflows:
       - backend-test:
           requires:
             - backend-lint
+      - audit-check-frontend:
+          requires:
+            - backend-test
+      - audit-check-backend:
+          requires:
+            - audit-check-frontend
