@@ -200,8 +200,7 @@ workflows:
       #     requires:
       #       - audit-check-frontend
       - network-infrastructure
-            requires:
-              - audit-check-frontend
+
       - backend-infrastructure
             requires:
               - network-infrastructure
