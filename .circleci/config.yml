@@ -202,7 +202,7 @@ workflows:
       - backend-infrastructure:
           requires:
             - network-infrastructure
-      - frontend-infrastructure-stack:
+      - frontend-infrastructure:
           requires:
             - backend-infrastructure
       - cloudfront-infrastructure:
