@@ -93,7 +93,7 @@ jobs:
       - run:
           name: Testing
           command: cd backend && npm audit --audit-level=critical
-  infrastructure_stack:
+  cloudfront-infrastructure-stack:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -154,6 +154,6 @@ workflows:
       # - audit-check-backend:
       #     requires:
       #       - audit-check-frontend
-      - cloudfront-infrastructure
+      - cloudfront-infrastructure-stack
       - frontend-infrastructure
       - backend-infrastructure
