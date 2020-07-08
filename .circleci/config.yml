@@ -105,12 +105,13 @@ jobs:
               --template-file .circleci/files/network.yml \
               --stack-name network-stack \
               --parameter-overrides EnvironmentName=prod \
-              --region us-west-2
+              --region us-east-2
       - run:
           name: Rollback
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name network-stack
+            aws cloudformation delete-stack --stack-name network-stack \
+            --region us-east-2
 
   backend-infrastructure:
     docker:
@@ -124,13 +125,15 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --stack-name backend-stack \
               --parameter-overrides ID=prod \
-              --region us-west-2
+              --region us-east-2
       - run:
           name: Rollback
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name network-stack
-            aws cloudformation delete-stack --stack-name backend-stack
+            aws cloudformation delete-stack --stack-name network-stack \
+            --region us-east-2
+            aws cloudformation delete-stack --stack-name backend-stack \
+            --region us-east-2
 
   frontend-infrastructure:
     docker:
@@ -144,14 +147,17 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --stack-name frontend-stack \
               --parameter-overrides ID=prod \
-              --region us-west-2
+              --region us-east-2
       - run:
           name: Rollback
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name network-stack
-            aws cloudformation delete-stack --stack-name backend-stack
-            aws cloudformation delete-stack --stack-name frontend-stack
+            aws cloudformation delete-stack --stack-name network-stack \
+            --region us-east-2
+            aws cloudformation delete-stack --stack-name backend-stack \
+            --region us-east-2
+            aws cloudformation delete-stack --stack-name frontend-stack \
+            --region us-east-2
 
   cloudfront-infrastructure:
     docker:
@@ -170,10 +176,14 @@ jobs:
           name: Rollback
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name network-stack
-            aws cloudformation delete-stack --stack-name backend-stack
-            aws cloudformation delete-stack --stack-name frontend-stack
-            aws cloudformation delete-stack --stack-name cloudfront-stack
+            aws cloudformation delete-stack --stack-name network-stack \
+            --region us-east-2
+            aws cloudformation delete-stack --stack-name backend-stack \
+            --region us-east-2
+            aws cloudformation delete-stack --stack-name frontend-stack \
+            --region us-east-2
+            aws cloudformation delete-stack --stack-name cloudfront-stack \
+            --region us-east-2
 
 workflows:
   default:
