@@ -93,7 +93,7 @@ jobs:
       - run:
           name: Testing
           command: cd backend && npm audit --audit-level=critical
-  network-infrastructure-stack:
+  network-infrastructure:
     docker:
       - image: amazon/aws-cli
     steps:
