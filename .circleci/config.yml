@@ -93,26 +93,67 @@ jobs:
       - run:
           name: Testing
           command: cd backend && npm audit --audit-level=critical
+  infrastructure_stack:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Create Infrastructure Stack
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/network.yml \
+              --stack-name network-stack \
+              --parameter-overrides EnvironmentName=prod
+
+  backend-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Backend Infrastructure
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --stack-name backend-stack \
+              --parameter-overrides ID=prod
+
+  frontend-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Frontend Infrastructure
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --stack-name frontend-stack \
+              --parameter-overrides ID=prod
 
 workflows:
   default:
     jobs:
-      - hello-world
-      - frontend-lint:
-          requires:
-            - hello-world
-      - frontend-test:
-          requires:
-            - frontend-lint
-      - backend-lint:
-          requires:
-            - frontend-test
-      - backend-test:
-          requires:
-            - backend-lint
-      - audit-check-frontend:
-          requires:
-            - backend-test
-      - audit-check-backend:
-          requires:
-            - audit-check-frontend
+      # - hello-world
+      # - frontend-lint:
+      #     requires:
+      #       - hello-world
+      # - frontend-test:
+      #     requires:
+      #       - frontend-lint
+      # - backend-lint:
+      #     requires:
+      #       - frontend-test
+      # - backend-test:
+      #     requires:
+      #       - backend-lint
+      # - audit-check-frontend:
+      #     requires:
+      #       - backend-test
+      # - audit-check-backend:
+      #     requires:
+      #       - audit-check-frontend
+      - cloudfront-infrastructure
+      - frontend-infrastructure
+      - backend-infrastructure
