@@ -104,7 +104,8 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/network.yml \
               --stack-name network-stack \
-              --parameter-overrides EnvironmentName=prod
+              --parameter-overrides EnvironmentName=prod \
+              --region us-west-2
 
   backend-infrastructure:
     docker:
@@ -117,6 +118,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --stack-name backend-stack \
+              --parameter-overrides ID=prod \
               --region us-west-2
 
   frontend-infrastructure:
@@ -130,6 +132,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --stack-name frontend-stack \
+              --parameter-overrides ID=prod \
               --region us-west-2
 
 workflows:
