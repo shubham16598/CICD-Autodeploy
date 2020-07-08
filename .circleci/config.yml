@@ -130,6 +130,7 @@ jobs:
           name: Rollback
           when: on_fail
           command: |
+            aws cloudformation describe-stack-events --stack-name backend-stack
             aws cloudformation delete-stack --stack-name network-stack \
             --region us-east-2
             aws cloudformation delete-stack --stack-name backend-stack \
