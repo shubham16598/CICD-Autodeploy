@@ -112,7 +112,6 @@ jobs:
           command: |
             aws cloudformation delete-stack --stack-name network-stack
 
-
   backend-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -170,12 +169,11 @@ jobs:
       - run:
           name: Rollback
           when: on_fail
-          command: |             
+          command: |
             aws cloudformation delete-stack --stack-name network-stack
             aws cloudformation delete-stack --stack-name backend-stack
             aws cloudformation delete-stack --stack-name frontend-stack
             aws cloudformation delete-stack --stack-name cloudfront-stack
-
 
 workflows:
   default:
@@ -201,12 +199,12 @@ workflows:
       #       - audit-check-frontend
       - network-infrastructure
 
-      - backend-infrastructure
-            requires:
-              - network-infrastructure
-      - frontend-infrastructure-stack
-            requires:
-              - backend-infrastructure
-      - cloudfront-infrastructure
-            requires:
-              - frontend-infrastructure
+      - backend-infrastructure:
+          requires:
+            - network-infrastructure
+      - frontend-infrastructure-stack:
+          requires:
+            - backend-infrastructure
+      - cloudfront-infrastructure:
+          requires:
+            - frontend-infrastructure
