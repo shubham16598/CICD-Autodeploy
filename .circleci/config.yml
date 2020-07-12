@@ -167,6 +167,8 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - attach_workspace:
+          at: /tmp/.circleci
       - checkout
       - run:
           name: output of files
