@@ -111,7 +111,7 @@ jobs:
               --filters "Name=tag:aws:cloudformation:stack-name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
-              --output text >> .circleci/ansible/url.txt
+              --output text >> ~/url.txt
       - run:
           name: Rollback
           when: on_fail
@@ -126,7 +126,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/url.txt
+            - url.txt
 
   frontend-infrastructure:
     docker:
@@ -162,7 +162,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/frontend.txt
+            - frontend.txt
   add-backend-ip-to-inventory:
     docker:
       - image: amazon/aws-cli
@@ -173,25 +173,25 @@ jobs:
             yum -y install tar
             yum -y install gzip
       - attach_workspace:
-          at: /tmp/.circleci
+          at: ~/
       - checkout
       - run:
           name: output of files
           command: |
-            ls
-            cat /tmp/.circleci/project/.circleci/ansible/frontend.txt
-            cat /tmp/.circleci/project/.circleci/ansible/url.txt
+
+            cat ~/frontend.txt
+            cat ~/url.txt
       - run:
           name: Backend IP to ansible inventory
           command: |
             aws ec2 decribe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
-              --output text >> .circleci/ansible/inventory.txt
+              --output text >> ~/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - inventory.txt
       - run:
           name: Rollback
           when: on_fail
@@ -207,7 +207,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/.circleci
+          at: ~/
       - add_ssh_keys:
           fingerprints: ["5c:90:ff:21:74:44:c0:8c:98:bf:64:bf:a0:0e:c4:63"]
 
@@ -218,7 +218,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i /tmp/.circleci/ansible/inventory.txt .circleci/ansible/main.yml
+            ansible-playbook -i ~/inventory.txt .circleci/ansible/main.yml
 
 workflows:
   default:
