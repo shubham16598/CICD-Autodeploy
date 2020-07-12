@@ -119,6 +119,11 @@ jobs:
           command: |
             aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
+      - run:
+          name: Install tar/gzip utility
+          command: |
+            yum -y install tar
+            yum -y install gzip
       - persist_to_workspace:
           root: ~/
           paths:
@@ -150,6 +155,11 @@ jobs:
               --region us-east-2
             aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
+      - run:
+          name: Install tar/gzip utility
+          command: |
+            yum -y install tar
+            yum -y install gzip
       - persist_to_workspace:
           root: ~/
           paths:
@@ -166,6 +176,11 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text >> .circleci/ansible/inventory.txt
+      - run:
+          name: Install tar/gzip utility
+          command: |
+            yum -y install tar
+            yum -y install gzip
       - persist_to_workspace:
           root: ~/
           paths:
