@@ -169,10 +169,10 @@ jobs:
     steps:
       - checkout
       - run:
-        name: output of files
-        command: |
-          cat /tmp/.circleci/ansible/frontend.txt
-          cat /tmp/.circleci/ansible/url.txt
+          name: output of files
+          command: |
+            cat /tmp/.circleci/ansible/frontend.txt
+            cat /tmp/.circleci/ansible/url.txt
       - run:
           name: Backend IP to ansible inventory
           command: |
