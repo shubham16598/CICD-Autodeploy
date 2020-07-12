@@ -7,8 +7,7 @@ commands:
           when: on_fail
           name: install aws aws-cli
           command: |
-            apk update
-            apk -y add awscli
+            apt-get install awscli
       - run:
           when: on_fail
           name: Delete frontend and backend stack
