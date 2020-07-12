@@ -93,25 +93,6 @@ jobs:
       - run:
           name: Testing
           command: cd backend && npm audit --audit-level=critical
-  network-infrastructure:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Create Network Infrastructure Stack
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/network.yml \
-              --stack-name network-stack \
-              --parameter-overrides EnvironmentName=prod \
-              --region us-east-2
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name network-stack \
-            --region us-east-2
 
   backend-infrastructure:
     docker:
@@ -130,11 +111,7 @@ jobs:
           name: Rollback
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name network-stack \
-              --region us-east-2
             aws cloudformation describe-stack-events --stack-name backend-stack \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name backend-stack \
               --region us-east-2
 
   frontend-infrastructure:
@@ -154,37 +131,9 @@ jobs:
           name: Rollback
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name network-stack \
-              --region us-east-2
             aws cloudformation delete-stack --stack-name backend-stack \
               --region us-east-2
             aws cloudformation delete-stack --stack-name frontend-stack \
-              --region us-east-2
-
-  cloudfront-infrastructure:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Cloudfront infrastructure
-          command: |
-            aws cloudformation deploy \
-              --template-file ./.circleci/files/cloudfront.yml \
-              --stack-name cloudfront-stack \
-              --parameter-overrides ID=prod \              
-              --no-fail-on-empty-changeset
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name network-stack \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name backend-stack \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name frontend-stack \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name cloudfront-stack \
               --region us-east-2
 
 workflows:
@@ -209,14 +158,9 @@ workflows:
       # - audit-check-backend:
       #     requires:
       #       - audit-check-frontend
-      - network-infrastructure
 
       - backend-infrastructure:
-          requires:
-            - network-infrastructure
+
       - frontend-infrastructure:
           requires:
             - backend-infrastructure
-      - cloudfront-infrastructure:
-          requires:
-            - frontend-infrastructure
