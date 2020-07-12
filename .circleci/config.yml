@@ -131,12 +131,6 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text >> ~/url.txt
-            BACKEND_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:aws:cloudformation:stack-name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --region us-east-2 \
-              --output text)
-            echo "http://${BACKEND_IP}:3030" >> ~/url.txt
       - run:
           name: Rollback
           when: on_fail
@@ -232,7 +226,6 @@ jobs:
   config_backend_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
-      - image: amazon/aws-cli
     steps:
       - checkout
       - attach_workspace:
@@ -243,7 +236,6 @@ jobs:
       - run:
           name: output of files
           command: |
-            cat ~/inventory.txt
             cat ~/url.txt
       - run:
           name: Install dependencies
@@ -252,7 +244,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i url.txt .circleci/ansible/playbook.yml
+            ansible-playbook -i ~/url.txt .circleci/ansible/playbook.yml
       - delete_stack
 
   database_migration:
