@@ -159,7 +159,7 @@ workflows:
       #     requires:
       #       - audit-check-frontend
 
-      - backend-infrastructure:
+      - backend-infrastructure
 
       - frontend-infrastructure:
           requires:
