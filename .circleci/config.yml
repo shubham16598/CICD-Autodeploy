@@ -136,11 +136,11 @@ jobs:
       - run:
           name: Frontend Infrastructure
           command: |
-            aws cloudformation describe-stack-resources \
-              --stack-name "${PRODUCTION_FRONTEND_STACK}" \
-              --query 'StackResources[?LogicalResourceId==`WebsiteBucket`].PhysicalResourceId' \
-              --region us-east-2 \
-              --output text >> .circleci/ansible/frontend.txt
+            # aws cloudformation describe-stack-resources \
+            #   --stack-name "${PRODUCTION_FRONTEND_STACK}" \
+            #   --query 'StackResources[?LogicalResourceId==`WebsiteBucket`].PhysicalResourceId' \
+            #   --region us-east-2 \
+            #   --output text >> .circleci/ansible/frontend.txt
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
