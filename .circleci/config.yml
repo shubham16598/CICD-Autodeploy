@@ -167,6 +167,11 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      - run:
+          name: Install tar/gzip utility
+          command: |
+            yum -y install tar
+            yum -y install gzip
       - attach_workspace:
           at: /tmp/.circleci
       - checkout
@@ -182,11 +187,6 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text >> .circleci/ansible/inventory.txt
-      - run:
-          name: Install tar/gzip utility
-          command: |
-            yum -y install tar
-            yum -y install gzip
       - persist_to_workspace:
           root: ~/
           paths:
