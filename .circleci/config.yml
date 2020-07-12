@@ -113,6 +113,11 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text >> ~/url.txt
+            BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --output text)
+            echo "http://${BACKEND_IP}:3030" >> ~/url.txt
       - run:
           name: Rollback
           when: on_fail
@@ -147,15 +152,8 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
               --parameter-overrides ID=frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
+              --region us-east-2 \
+              --output test >> ~/frontend.txt
       - run:
           name: Install tar/gzip utility
           command: |
@@ -165,6 +163,14 @@ jobs:
           root: ~/
           paths:
             - frontend.txt
+      - run:
+          name: Rollback
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
   add-backend-ip-to-inventory:
     docker:
       - image: amazon/aws-cli
@@ -187,7 +193,7 @@ jobs:
       - run:
           name: Backend IP to ansible inventory
           command: |
-            aws ec2 decribe-instances \
+            aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text >> ~/inventory.txt
@@ -204,7 +210,7 @@ jobs:
             aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
 
-  backend_infrastructure:
+  conig_backend_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
     steps:
@@ -222,6 +228,33 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i ~/inventory.txt .circleci/ansible/main.yml
+      - run:
+          name: Rollback
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+  database_migration:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      - run:
+          name: Database migration
+          command: |
+            cd backend
+            npm i
+            npm run migrations
+      - run:
+          name: Rollback
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
 
 workflows:
   default:

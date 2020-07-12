@@ -17,26 +17,26 @@
     production: yes
     state: present
 
-- name: "copy backend file"
+- name: "Copy backend files"
   become: true
   copy:
     src: /root/project/backend
     dest: /root
     force: no
 
-- name: "install npm packages"
+- name: "Install npm packages"
   become: true
   command: npm install
   args:
     chdir: /root/backend
 
-- name: "compile npm packages"
+- name: "Build"
   become: true
   command: npm run build
   args:
     chdir: /root/backend
 
-- name: "start server"
+- name: "Start Server"
   become: true
   command: pm2 start npm -- run start
   args:
