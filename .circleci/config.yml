@@ -114,7 +114,7 @@ jobs:
               --region us-east-2 \
               --output text >> ~/url.txt
             BACKEND_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --filters "Name=tag:aws:cloudformation:stack-name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text)
@@ -190,7 +190,6 @@ jobs:
 
             cat ~/frontend.txt
             cat ~/url.txt
-      - run: echo "[all]" > ~/inventory.txt
       - run:
           name: Backend IP to ansible inventory
           command: |
@@ -222,6 +221,10 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["5c:90:ff:21:74:44:c0:8c:98:bf:64:bf:a0:0e:c4:63"]
 
+      - run:
+          name: output of files
+          command: |
+            cat ~/inventory.txt
       - run:
           name: Install dependencies
           command: |
