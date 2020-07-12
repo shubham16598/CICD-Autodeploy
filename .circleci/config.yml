@@ -214,6 +214,7 @@ jobs:
   config_backend_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - attach_workspace:
@@ -232,7 +233,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/inventory.txt .circleci/ansible/main.yml
+            ansible-playbook -i inventory.txt .circleci/ansible/playbook.yml
       - run:
           name: Rollback
           when: on_fail
