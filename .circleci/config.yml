@@ -154,7 +154,7 @@ jobs:
               --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
               --parameter-overrides ID=frontend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2 \
-              --output test >> ~/frontend.txt
+              --output text >> ~/frontend.txt
       - run:
           name: Install tar/gzip utility
           command: |
@@ -195,6 +195,7 @@ jobs:
           name: Backend IP to ansible inventory
           command: |
             aws ec2 describe-instances \
+              --filters "Name=tag:aws:cloudformation:stack-name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text >> ~/inventory.txt
@@ -211,7 +212,7 @@ jobs:
             aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
 
-  conig_backend_infrastructure:
+  config_backend_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
     steps:
@@ -288,3 +289,9 @@ workflows:
       - add-backend-ip-to-inventory:
           requires:
             - frontend-infrastructure
+      - config_backend_infrastructure:
+          requires:
+            - add-backend-ip-to-inventory
+      - database_migration:
+          requires:
+            - config_backend_infrastructure
