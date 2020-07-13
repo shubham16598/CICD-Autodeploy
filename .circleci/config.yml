@@ -23,7 +23,7 @@ jobs:
       - run:
           name: Say Hello
           command: |
-            echo "First Job"
+            echo "First Job "
   # The Frontend job
   frontend-lint:
     docker:
