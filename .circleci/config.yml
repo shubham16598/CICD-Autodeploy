@@ -230,7 +230,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - add_ssh_keys:
-          fingerprints: "5c:90:ff:21:74:44:c0:8c:98:bf:64:bf:a0:0e:c4:63"
+          fingerprints:
+            - "5c:90:ff:21:74:44:c0:8c:98:bf:64:bf:a0:0e:c4:63"
 
       - run:
           name: output of files
@@ -243,7 +244,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/url.txt .circleci/ansible/playbook.yml
+            ansible-playbook -i ~/url.txt playbook.yml
       - delete_stack
 
   database_migration:
