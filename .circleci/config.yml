@@ -2,12 +2,9 @@ version: 2.1
 
 commands:
   delete_stack:
+    docker:
+      - image: amazon/aws-cli
     steps:
-      - run:
-          when: on_fail
-          name: install aws aws-cli
-          command: |
-            apt-get install awscli
       - run:
           when: on_fail
           name: Delete frontend and backend stack
@@ -244,7 +241,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/url.txt playbook.yml
+            ansible-playbook -i ~/url.txt ansible/playbook.yml
       - delete_stack
 
   database_migration:
