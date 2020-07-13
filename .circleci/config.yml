@@ -244,7 +244,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/url.txt ansible/playbook.yml
+            ansible-playbook -i ~/url.txt .circleci/ansible/playbook.yml
       - delete_stack
 
   database_migration:
