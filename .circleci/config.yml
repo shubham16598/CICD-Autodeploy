@@ -1,22 +1,5 @@
 version: 2.1
 
-commands:
-  delete_stack:
-    steps:
-      - run:
-          when: on_fail
-          name: install aws aws-cli
-          command: |
-            apt-get install awscli
-      - run:
-          when: on_fail
-          name: Delete frontend and backend stack
-          command: |
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-
 jobs:
   hello-world:
     docker:
@@ -224,6 +207,7 @@ jobs:
 
   config_backend_infrastructure:
     docker:
+      - image: amazon/aws-cli
       - image: python:3.7-alpine3.11
     environment:
       TYPEORM_CONNECTION: $TYPEORM_CONNECTION
@@ -253,10 +237,18 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i ~/url.txt .circleci/ansible/playbook.yml
-      - delete_stack
+      - run:
+          name: Rollback
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
 
   database_migration:
     docker:
+      - image: amazon/aws-cli
       - image: circleci/node:10-browsers
     steps:
       - checkout
@@ -265,8 +257,14 @@ jobs:
           command: |
             cd backend
             npm i
-            npm run migrations
-      - delete_stack
+      - run:
+          name: Rollback
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
 
 workflows:
   default:
