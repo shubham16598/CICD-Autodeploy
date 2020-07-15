@@ -208,27 +208,14 @@ jobs:
   config_backend_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
-    environment:
-      TYPEORM_CONNECTION: $TYPEORM_CONNECTION
-      TYPEORM_HOST: $TYPEORM_HOST
-      TYPEORM_PORT: $TYPEORM_PORT
-      TYPEORM_USERNAME: $TYPEORM_USERNAME
-      TYPEORM_PASSWORD: $TYPEORM_PASSWORD
-      TYPEORM_DATABASE: $TYPEORM_DATABASE
-      TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
-      TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
-      - run:
-          name: Install tar/gzip utility
-          command: |
-            yum -y install tar
-            yum -y install gzip
       - attach_workspace:
           at: ~/
       - add_ssh_keys:
           fingerprints:
             - "5c:90:ff:21:74:44:c0:8c:98:bf:64:bf:a0:0e:c4:63"
+
       - run:
           name: output of files
           command: |
@@ -241,14 +228,6 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i ~/url.txt .circleci/ansible/playbook.yml
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
 
   database_migration:
     docker:
