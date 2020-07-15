@@ -207,7 +207,6 @@ jobs:
 
   config_backend_infrastructure:
     docker:
-      - image: amazon/aws-cli
       - image: python:3.7-alpine3.11
     environment:
       TYPEORM_CONNECTION: $TYPEORM_CONNECTION
@@ -252,7 +251,6 @@ jobs:
 
   database_migration:
     docker:
-      - image: amazon/aws-cli
       - image: circleci/node:10-browsers
     steps:
       - checkout
