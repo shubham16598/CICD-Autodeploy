@@ -208,7 +208,6 @@ jobs:
   config_backend_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
-      - image: amazon/aws-cli
     environment:
       TYPEORM_CONNECTION: $TYPEORM_CONNECTION
       TYPEORM_HOST: $TYPEORM_HOST
