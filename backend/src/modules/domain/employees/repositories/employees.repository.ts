@@ -26,12 +26,7 @@ export class EmployeeRepository extends BaseRepository<number, Employee> {
       .where(
         'employee.firstName = :firstName AND employee.middleName = :middleName ' +
           'AND employee.lastName = :lastName AND employee.secondLastName = :secondLastName',
-        {
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
-          secondLastName: secondLastName,
-        },
+        { firstName, middleName, lastName, secondLastName },
       )
       .getOne();
     return emp;
