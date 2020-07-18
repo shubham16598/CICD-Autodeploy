@@ -9,10 +9,7 @@ export class CheckUpdatePhoneNumberPropertiesValue extends JoiCommandValidator<
   getSchema(command: UpdateEmployeePhoneNumber) {
     return joi.object({
       employeeId: joi.number().required(),
-      phoneNumber: joi
-        .string()
-        .allow('')
-        .optional(),
+      phoneNumber: joi.string().allow('').optional(),
     });
   }
 }

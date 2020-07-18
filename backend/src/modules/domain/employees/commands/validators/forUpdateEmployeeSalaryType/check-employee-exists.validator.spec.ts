@@ -22,13 +22,10 @@ describe('Check if employee exists', () => {
       const params = {
         employeeId: 100,
         salaryType: 'Montly',
-      };
+        };
 
       // Act
-      const updateEmployee = new UpdateEmployeeSalaryType(
-        params.employeeId,
-        params.salaryType,
-      );
+      const updateEmployee = new UpdateEmployeeSalaryType(params.employeeId, params.salaryType);
       const result = await employeeValidator.validate(updateEmployee);
 
       // Assert

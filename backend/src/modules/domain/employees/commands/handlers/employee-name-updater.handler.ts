@@ -8,10 +8,7 @@ import { SalaryType } from '../../entities/employee.entity';
 
 @CommandHandler(UpdateEmployeeName)
 @Injectable()
-export class EmployeeNameUpdater extends BaseCommandHandler<
-  UpdateEmployeeName,
-  void
-> {
+export class EmployeeNameUpdater extends BaseCommandHandler<UpdateEmployeeName, void> {
   constructor(private readonly employeeRepository: EmployeeRepository) {
     super();
   }
@@ -21,7 +18,7 @@ export class EmployeeNameUpdater extends BaseCommandHandler<
       firstName,
       middleName,
       lastName,
-      secondLastName,
+      secondLastName
     } = command;
 
     const employee = await this.employeeRepository.findById(employeeId);

@@ -23,10 +23,7 @@ describe('Employee Salary Type Updater', () => {
         salaryType: 'Montly',
       };
 
-      const updateEmployee = new UpdateEmployeeSalaryType(
-        params.employeeId,
-        params.salaryType,
-      );
+      const updateEmployee = new UpdateEmployeeSalaryType(params.employeeId,params.salaryType);
 
       // Act
       await handler.handle(updateEmployee);

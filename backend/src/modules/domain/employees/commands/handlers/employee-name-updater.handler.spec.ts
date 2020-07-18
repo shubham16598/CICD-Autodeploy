@@ -26,13 +26,8 @@ describe('Employee Name Updater', () => {
         middleName: 'test',
       };
 
-      const updateEmployee = new UpdateEmployeeName(
-        params.employeeId,
-        params.firstName,
-        params.middleName,
-        params.lastName,
-        params.secondLastName,
-      );
+      const updateEmployee = new UpdateEmployeeName(params.employeeId, params.firstName, params.middleName,
+        params.lastName, params.secondLastName);
 
       // Act
       await handler.handle(updateEmployee);

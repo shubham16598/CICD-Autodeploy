@@ -6,10 +6,7 @@ import { EmployeeRepository } from '../../repositories/employees.repository';
 
 @CommandHandler(ActivateEmployee)
 @Injectable()
-export class EmployeeActivator extends BaseCommandHandler<
-  ActivateEmployee,
-  void
-> {
+export class EmployeeActivator extends BaseCommandHandler<ActivateEmployee, void> {
   constructor(private readonly employeeRepository: EmployeeRepository) {
     super();
   }

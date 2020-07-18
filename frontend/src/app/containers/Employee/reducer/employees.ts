@@ -9,10 +9,7 @@ export const employeesInitialState: EmployeeState = {
   employees: [],
 };
 
-export const employeeReducer = handleActions<
-  EmployeeState,
-  EmployeePayloadType
->(
+export const employeeReducer = handleActions<EmployeeState, EmployeePayloadType>(
   {
     [EmployeeActions.Type.FETCH_EMPLOYEES_REQUEST]: state => {
       return {
@@ -61,14 +58,11 @@ export const employeeReducer = handleActions<
         isFetching: false,
       };
     },
-    [EmployeeActions.Type.UPDATE_EMPLOYEE_DISPLAY_NAME_FAILURE]: (
-      state,
-      action,
-    ) => {
+    [EmployeeActions.Type.UPDATE_EMPLOYEE_DISPLAY_NAME_FAILURE]: (state, action) => {
       return {
         ...state,
         isFetching: false,
-        errorMessage: (action.payload as Error).message,
+        errorMessage: (action.payload as Error).message
       };
     },
   },

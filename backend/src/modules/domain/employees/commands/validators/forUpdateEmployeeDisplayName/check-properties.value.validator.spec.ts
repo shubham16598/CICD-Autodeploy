@@ -9,13 +9,10 @@ describe('Update Employee Validator', () => {
       const params = {
         employeeId: 10,
         displayName: 'Test display',
-      };
+        };
 
       // Act
-      const updateEmployee = new UpdateEmployeeDisplayName(
-        params.employeeId,
-        params.displayName,
-      );
+      const updateEmployee = new UpdateEmployeeDisplayName(params.employeeId, params.displayName);
       const result = await updateEmployeeValidator.validate(updateEmployee);
 
       // Assert

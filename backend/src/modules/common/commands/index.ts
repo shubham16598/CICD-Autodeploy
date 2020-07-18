@@ -5,4 +5,6 @@ export * from './commandDispatcher';
 export * from './ICommand';
 export * from './validation';
 export * from './baseCommandHandler';
-export { InvalidCommandValidatorException } from './validation/invalidCommandValidatorException';
+export {
+  InvalidCommandValidatorException,
+} from './validation/invalidCommandValidatorException';

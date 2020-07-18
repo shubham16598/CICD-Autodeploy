@@ -33,19 +33,19 @@ export class SearchBar extends React.Component<SearchBar.Props> {
     this.setState({
       showGoButton: true,
     });
-  };
+  }
 
   onSearchBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     this.setState({
       showGoButton: false,
     });
-  };
+  }
 
   onOpenNavigationBar = (event: React.MouseEvent<HTMLAnchorElement>) => {
     this.setState({
       showNavigationBar: true,
     });
-  };
+  }
 
   render() {
     // const { searchInput } = this.props;
@@ -64,8 +64,10 @@ export class SearchBar extends React.Component<SearchBar.Props> {
         >
           <div className={style['cont-menu-tablet']}>
             <a
-              className={`${style['btn-menu-tablet']} ${style.button} ${style.primary} ${style.clear}`}
-              aria-label="Open Navigation Bar"
+              className={`${style['btn-menu-tablet']} ${style.button} ${
+                style.primary
+              } ${style.clear}`}
+              aria-label='Open Navigation Bar'
               onClick={this.onOpenNavigationBar}
             >
               <i className={`${style.icon} ${style['i-menu-1']}`} />
@@ -74,8 +76,8 @@ export class SearchBar extends React.Component<SearchBar.Props> {
           <div className={style['cont-search']}>
             <input
               className={style['e-searchbar']}
-              type="search"
-              placeholder="Search in the app"
+              type='search'
+              placeholder='Search in the app'
               onFocus={this.onSearchFocus}
               onBlur={this.onSearchBlur}
             />
@@ -89,7 +91,9 @@ export class SearchBar extends React.Component<SearchBar.Props> {
           </div>
         </div>
         <div
-          className={`${style.cell} ${style['medium-2']} ${style['small-12']} ${style['text-right']}`}
+          className={`${style.cell} ${style['medium-2']} ${style['small-12']} ${
+            style['text-right']
+          }`}
         />
       </div>
     );

@@ -9,13 +9,12 @@ export class CheckUpdateAddressPropertiesValue extends JoiCommandValidator<
   getSchema(command: UpdateEmployeeAddress) {
     return joi.object({
       employeeId: joi.number().required(),
-      address: joi
+      address: joi.string().allow('').optional(),
+      country: joi
         .string()
-        .allow('')
-        .optional(),
-      country: joi.string().required(),
+        .required(),
       city: joi.string().required(),
-      region: joi.string().required(),
+      region: joi.string().required()
     });
   }
 }

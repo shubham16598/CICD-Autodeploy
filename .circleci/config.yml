@@ -224,6 +224,7 @@ jobs:
           name: Env Variables
           command: |
             echo "ENVIRONMENT=production" > backend/.env
+            echo "NODE_ENV=production" >> backend/.env
             echo "TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS" >> backend/.env
             echo "TYPEORM_ENTITIES=$TYPEORM_ENTITIES" >> backend/.env
             echo "TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR" >> backend/.env
@@ -250,7 +251,8 @@ jobs:
       - run:
           name: Env Variables
           command: |
-            echo "NODE_ENV=production" > backend/.env
+            echo "ENVIRONMENT=production" > backend/.env
+            echo "NODE_ENV=production" >> backend/.env
             echo "TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS" >> backend/.env
             echo "TYPEORM_ENTITIES=$TYPEORM_ENTITIES" >> backend/.env
             echo "TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR" >> backend/.env
@@ -309,6 +311,6 @@ workflows:
       - config_backend_infrastructure:
           requires:
             - add-backend-ip-to-inventory
-      - database_migration:
-          requires:
-            - config_backend_infrastructure
+      #- database_migration:
+          #requires:
+            #- config_backend_infrastructure

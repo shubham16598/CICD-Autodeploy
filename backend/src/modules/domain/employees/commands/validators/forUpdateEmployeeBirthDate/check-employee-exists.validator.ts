@@ -7,8 +7,7 @@ import { EmployeeRepository } from '../../../repositories/employees.repository';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class CheckEmployeeBirthDateExists
-  implements ICommandValidator<UpdateEmployeeBirthdate> {
+export class CheckEmployeeBirthDateExists implements ICommandValidator<UpdateEmployeeBirthdate> {
   constructor(private readonly employeeRepository: EmployeeRepository) {}
 
   async validate(command: UpdateEmployeeBirthdate): Promise<IValidationResult> {
