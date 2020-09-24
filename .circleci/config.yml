@@ -280,29 +280,29 @@ jobs:
 workflows:
   default:
     jobs:
-      # - hello-world
-      # - frontend-lint:
-      #     requires:
-      #       - hello-world
-      # - frontend-test:
-      #     requires:
-      #       - frontend-lint
-      # - backend-lint
-      #     requires:
-      #       - frontend-test
-      # - backend-test:
-      #     requires:
-      #       - backend-lint
-      - audit-check-frontend
-          # requires:
-          #   - backend-test
+      - hello-world
+      - frontend-lint:
+          requires:
+            - hello-world
+      - frontend-test:
+          requires:
+            - frontend-lint
+      - backend-lint:
+          requires:
+            - frontend-test
+      - backend-test:
+          requires:
+            - backend-lint
+      - audit-check-frontend:
+          requires:
+            - backend-test
       - audit-check-backend:
           requires:
             - audit-check-frontend
 
       - backend-infrastructure:
           requires:
-            - audit-check-frontend
+            - audit-check-backend
 
       - frontend-infrastructure:
           requires:
