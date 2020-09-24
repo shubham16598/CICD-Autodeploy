@@ -278,18 +278,24 @@ jobs:
               --region us-east-2
 
 workflows:
+  build-and-publish:
+    jobs:
+      - publish:   
+          filters:
+            branches:
+              only: master
   default:
     jobs:
-      - hello-world
-      - frontend-lint:
-          requires:
-            - hello-world
-      - frontend-test:
-          requires:
-            - frontend-lint
+      # - hello-world
+      # - frontend-lint:
+      #     requires:
+      #       - hello-world
+      # - frontend-test:
+      #     requires:
+      #       - frontend-lint
       - backend-lint:
-          requires:
-            - frontend-test
+          # requires:
+          #   - frontend-test
       - backend-test:
           requires:
             - backend-lint
