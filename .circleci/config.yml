@@ -293,7 +293,7 @@ workflows:
       # - frontend-test:
       #     requires:
       #       - frontend-lint
-      - backend-lint:
+      - backend-lint
           # requires:
           #   - frontend-test
       - backend-test:
