@@ -395,7 +395,7 @@ workflows:
       #       - audit-check-frontend
 
 
-      - backend-infrastructure
+      - backend-infrastructure:
           # requires:
           #   - audit-check-backend
           filters:
