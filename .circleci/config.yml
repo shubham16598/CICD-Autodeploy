@@ -106,7 +106,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --parameter-overrides ID=backend-${CIRCLE_WORKFLOW_ID} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
             aws ec2 describe-instances \
               --filters "Name=tag:aws:cloudformation:stack-name,Values=backend-${CIRCLE_WORKFLOW_ID}" \
@@ -148,7 +148,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --parameter-overrides ID=frontend-${CIRCLE_WORKFLOW_ID} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID} \
               --region us-east-2 \
               --output text >> ~/frontend.txt
       - run:
@@ -289,7 +289,7 @@ jobs:
       - run:
           name: S3 Bucket
           command: |
-            aws s3 sync ./frontend/dist s3://udapeople-s3bucket-${CIRCLE_WORKFLOW_ID}/ 
+            aws s3 sync ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ 
       - run:
           name: Rollback
           when: on_fail
@@ -308,7 +308,7 @@ jobs:
       - run:
           name: Smoke test on frontend
           command: |
-            URL="http://udapeople-s3bucket-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/employees"
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/employees"
             if curl -s ${URL} | grep "Welcome"
             then
               return 0
@@ -347,20 +347,15 @@ jobs:
             echo OLD_CIRCLE_WORKFLOW_ID=${OLD_CIRCLE_WORKFLOW_ID}
             STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter UPDATE_COMPLETE CREATE_COMPLETE --output text)
             echo STACKS=${STACKS}
-            echo "Create/Update CloudFront"
             aws cloudformation deploy \
               --stack-name udapeople-cloudfront \
               --template-file .circleci/files/cloudfront.yml \
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"
-            echo "Delete old infrastructure"
             if [ -n "${OLD_CIRCLE_WORKFLOW_ID}" ] && [[ "${STACKS[@]}" =~ "${OLD_CIRCLE_WORKFLOW_ID}" ]]
             then
-              echo deleting all files at S3 bucket udapeople-s3bucket-${OLD_CIRCLE_WORKFLOW_ID}
-              aws s3 rm s3://udapeople-s3bucket-${OLD_CIRCLE_WORKFLOW_ID}/ --recursive
-              echo deleting stack frontend-${OLD_CIRCLE_WORKFLOW_ID}
+              aws s3 rm s3://udapeople-${OLD_CIRCLE_WORKFLOW_ID}/ --recursive
               aws cloudformation delete-stack --stack-name frontend-${OLD_CIRCLE_WORKFLOW_ID}
-              echo deleting stack backend-${OLD_CIRCLE_WORKFLOW_ID}
               aws cloudformation delete-stack --stack-name backend-${OLD_CIRCLE_WORKFLOW_ID}
             fi
       - run:
