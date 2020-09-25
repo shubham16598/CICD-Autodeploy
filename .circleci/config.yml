@@ -302,9 +302,16 @@ jobs:
 
   smoke-test:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - run:
+          name: Install system dependencies
+          command: |
+            apk add --no-cache curl
+            apk add --no-cache --upgrade bash
+            apk add --no-cache --update npm
+            pip3 install awscli
       - run:
           name: Smoke test on frontend
           command: |
@@ -335,11 +342,17 @@ jobs:
             aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
 
-  delete-old:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - run:
+          name: Install system dependencies
+          command: |
+            apk add --no-cache curl
+            apk add --no-cache --upgrade bash
+            apk add --no-cache --update npm
+            pip3 install awscli
       - run:
           name: Promote the new deployment and delete the old one
           command: |
