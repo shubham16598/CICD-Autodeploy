@@ -328,16 +328,16 @@ jobs:
             PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
             echo ${PUBLIC_DNS}
             curl -s "http://${PUBLIC_DNS}:3030/api/status"
-            
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
+
+      # - run:
+      #     name: Rollback
+      #     when: on_fail
+      #     command: |
+      #       aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
+      #       aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+      #         --region us-east-2
+      #       aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+      #         --region us-east-2
   delete-old:
     docker:
       - image: python:3.7-alpine3.11
