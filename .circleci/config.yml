@@ -113,6 +113,13 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --region us-east-2 \
               --output text >> ~/url.txt
+            PUBLIC_DNS=$(aws ec2 describe-instances --region ${AWS_DEFAULT_REGION} --filters 'Name=tag:Name,Values=backend-ec2-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            echo ${PUBLIC_DNS}
+            curl -H "Content-Type: text/plain" \
+               -H "token: ${CIRCLE_WORKFLOW_ID}" \
+               --request PUT \
+               --data ${PUBLIC_DNS} \
+               https://api.memstash.io/values/public_dns
       - run:
           name: Rollback
           when: on_fail
@@ -138,11 +145,6 @@ jobs:
       - run:
           name: Frontend Infrastructure
           command: |
-            # aws cloudformation describe-stack-resources \
-            #   --stack-name "${PRODUCTION_FRONTEND_STACK}" \
-            #   --query 'StackResources[?LogicalResourceId==`WebsiteBucket`].PhysicalResourceId' \
-            #   --region us-east-2 \
-            #   --output text >> .circleci/ansible/frontend.txt
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
@@ -214,7 +216,7 @@ jobs:
           at: ~/
       - add_ssh_keys:
           fingerprints:
-            - "5c:90:ff:21:74:44:c0:8c:98:bf:64:bf:a0:0e:c4:63"
+            - "25:74:6d:d3:06:27:bd:99:8b:e5:2e:38:62:18:7f:5a"
 
       - run:
           name: output of files
@@ -234,6 +236,17 @@ jobs:
             echo "TYPEORM_USERNAME=$TYPEORM_USERNAME" >> backend/.env
             echo "TYPEORM_PASSWORD=$TYPEORM_PASSWORD" >> backend/.env
             echo "TYPEORM_DATABASE=$TYPEORM_DATABASE" >> backend/.env
+            echo "ENVIRONMENT=development" > backend/development.env
+            echo "NODE_ENV=development" >> backend/development.env
+            echo "TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS" >> backend/development.env
+            echo "TYPEORM_ENTITIES=$TYPEORM_ENTITIES" >> backend/development.env
+            echo "TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR" >> backend/development.env
+            echo "TYPEORM_CONNECTION=$TYPEORM_CONNECTION" >> backend/development.env
+            echo "TYPEORM_HOST=$TYPEORM_HOST" >> backend/development.env
+            echo "TYPEORM_PORT=$TYPEORM_PORT" >> backend/development.env
+            echo "TYPEORM_USERNAME=$TYPEORM_USERNAME" >> backend/development.env
+            echo "TYPEORM_PASSWORD=$TYPEORM_PASSWORD" >> backend/development.env
+            echo "TYPEORM_DATABASE=$TYPEORM_DATABASE" >> backend/development.env
       - run:
           name: Install dependencies
           command: |
@@ -242,32 +255,6 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i ~/url.txt .circleci/ansible/playbook.yml
-
-  database_migration:
-    docker:
-      - image: circleci/node:10-browsers
-    steps:
-      - checkout
-      - run:
-          name: Env Variables
-          command: |
-            echo "ENVIRONMENT=production" > backend/.env
-            echo "NODE_ENV=production" >> backend/.env
-            echo "TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS" >> backend/.env
-            echo "TYPEORM_ENTITIES=$TYPEORM_ENTITIES" >> backend/.env
-            echo "TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR" >> backend/.env
-            echo "TYPEORM_CONNECTION=$TYPEORM_CONNECTION" >> backend/.env
-            echo "TYPEORM_HOST=$TYPEORM_HOST" >> backend/.env
-            echo "TYPEORM_PORT=$TYPEORM_PORT" >> backend/.env
-            echo "TYPEORM_USERNAME=$TYPEORM_USERNAME" >> backend/.env
-            echo "TYPEORM_PASSWORD=$TYPEORM_PASSWORD" >> backend/.env
-            echo "TYPEORM_DATABASE=$TYPEORM_DATABASE" >> backend/.env
-      - run:
-          name: Database migration
-          command: |
-            cd backend
-            npm install 
-            npm run migrations
       - run:
           name: Rollback
           when: on_fail
@@ -275,44 +262,196 @@ jobs:
             aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
             aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2  
+
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Frontend Build
+          command: |
+            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            echo ${PUBLIC_DNS}
+            export API_URL="http://${PUBLIC_DNS}:3030"
+            echo API_URL=${API_URL}
+            cd frontend
+            npm install
+            npm run build
+      - run:
+          name: S3 Bucket
+          command: |
+            aws s3 cp ./frontend/dist s3://udapeople-s3bucket-${CIRCLE_WORKFLOW_ID}/ --recursive
+      - run:
+          name: Rollback
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+
+
+  smoke-test:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Smoke test on frontend
+          command: |
+            URL="http://udapeople-s3bucket-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/employees"
+            if curl -s ${URL} | grep "Welcome"
+            then
+              return 0
+            else
+              return 1
+            fi
+      - run:
+          name: Smoke test on backend
+          command: |
+            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            echo ${PUBLIC_DNS}
+            if curl -s "http://${PUBLIC_DNS}:3030/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
+      - run:
+          name: Rollback
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+
+  delete-old:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Promote the new deployment and delete the old one
+          command: |
+            OLD_CIRCLE_WORKFLOW_ID=$(aws cloudformation list-exports --query "Exports[?Name=='CircleCI-WorkflowID'].Value" --output text)
+            echo OLD_CIRCLE_WORKFLOW_ID=${OLD_CIRCLE_WORKFLOW_ID}
+            STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter UPDATE_COMPLETE CREATE_COMPLETE --output text)
+            echo STACKS=${STACKS}
+            echo "Create/Update CloudFront"
+            aws cloudformation deploy \
+              --stack-name udapeople-cloudfront \
+              --template-file .circleci/files/cloudfront.yml \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"
+            echo "Delete old infrastructure"
+            if [ -n "${OLD_CIRCLE_WORKFLOW_ID}" ] && [[ "${STACKS[@]}" =~ "${OLD_CIRCLE_WORKFLOW_ID}" ]]
+            then
+              echo deleting all files at S3 bucket udapeople-s3bucket-${OLD_CIRCLE_WORKFLOW_ID}
+              aws s3 rm s3://udapeople-s3bucket-${OLD_CIRCLE_WORKFLOW_ID}/ --recursive
+              echo deleting stack frontend-${OLD_CIRCLE_WORKFLOW_ID}
+              aws cloudformation delete-stack --stack-name frontend-${OLD_CIRCLE_WORKFLOW_ID}
+              echo deleting stack backend-${OLD_CIRCLE_WORKFLOW_ID}
+              aws cloudformation delete-stack --stack-name backend-${OLD_CIRCLE_WORKFLOW_ID}
+            fi
+      - destroy-aws-resource
+      - slack/status
 
 workflows:
   default:
     jobs:
       - hello-world
+      
       - frontend-lint:
           requires:
             - hello-world
+          filters:
+            branches:
+              ignore: master
+
       - frontend-test:
           requires:
             - frontend-lint
+          filters:
+            branches:
+              ignore: master
+
       - backend-lint:
           requires:
             - frontend-test
+          filters:
+            branches:
+              ignore: master
+
       - backend-test:
           requires:
             - backend-lint
+          filters:
+            branches:
+              ignore: master
+
       - audit-check-frontend:
           requires:
             - backend-test
+          filters:
+            branches:
+              ignore: master
+
       - audit-check-backend:
           requires:
             - audit-check-frontend
+          filters:
+            branches:
+              ignore: master
 
       - backend-infrastructure:
           requires:
             - audit-check-backend
+          filters:
+            branches:
+              only: master
 
       - frontend-infrastructure:
           requires:
             - backend-infrastructure
+          filters:
+            branches:
+              only: master
+
       - add-backend-ip-to-inventory:
           requires:
             - frontend-infrastructure
+          filters:
+            branches:
+              only: master
+
       - config_backend_infrastructure:
           requires:
             - add-backend-ip-to-inventory
-      #- database_migration:
-          #requires:
-            #- config_backend_infrastructure
+          filters:
+            branches:
+              only: master
+
+      - deploy-frontend:
+          requires:
+            - config_backend_infrastructure
+          filters:
+            branches:
+              only: master
+
+      - smoke-test:
+          requires:
+            - deploy-frontend
+          filters:
+            branches:
+              only: master
+
+      - delete-old:
+          requires:
+            - smoke-test
+          filters:
+            branches:
+              only: master
+
