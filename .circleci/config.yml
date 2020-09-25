@@ -373,44 +373,27 @@ workflows:
       - frontend-lint:
           requires:
             - hello-world
-          filters:
-            branches:
-              ignore: master
 
       - frontend-test:
           requires:
             - frontend-lint
-          filters:
-            branches:
-              ignore: master
 
       - backend-lint:
           requires:
             - frontend-test
-          filters:
-            branches:
-              ignore: master
 
       - backend-test:
           requires:
             - backend-lint
-          filters:
-            branches:
-              ignore: master
 
       - audit-check-frontend:
           requires:
             - backend-test
-          filters:
-            branches:
-              ignore: master
 
       - audit-check-backend:
           requires:
             - audit-check-frontend
-          filters:
-            branches:
-              ignore: master
+
 
       - backend-infrastructure:
           requires:
