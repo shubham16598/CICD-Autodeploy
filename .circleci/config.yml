@@ -337,11 +337,12 @@ jobs:
           name: Rollback
           when: on_fail
           command: |
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
             aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
             aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
-
+  delete-old:
     docker:
       - image: python:3.7-alpine3.11
     steps:
@@ -375,6 +376,7 @@ jobs:
           name: Rollback
           when: on_fail
           command: |
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
             aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
               --region us-east-2
             aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
