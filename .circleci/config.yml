@@ -327,7 +327,6 @@ jobs:
           command: |
             PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
             echo ${PUBLIC_DNS}
-            curl -s "http://${PUBLIC_DNS}:3030/api/status"
 
   delete-old:
     docker:
@@ -372,36 +371,36 @@ jobs:
 workflows:
   default:
     jobs:
-      # - hello-world
+      - hello-world
       
-      # - frontend-lint:
-      #     requires:
-      #       - hello-world
+      - frontend-lint:
+          requires:
+            - hello-world
 
-      # - frontend-test:
-      #     requires:
-      #       - frontend-lint
+      - frontend-test:
+          requires:
+            - frontend-lint
 
-      # - backend-lint:
-      #     requires:
-      #       - frontend-test
+      - backend-lint:
+          requires:
+            - frontend-test
 
-      # - backend-test:
-      #     requires:
-      #       - backend-lint
+      - backend-test:
+          requires:
+            - backend-lint
 
-      # - audit-check-frontend:
-      #     requires:
-      #       - backend-test
+      - audit-check-frontend:
+          requires:
+            - backend-test
 
-      # - audit-check-backend:
-      #     requires:
-      #       - audit-check-frontend
+      - audit-check-backend:
+          requires:
+            - audit-check-frontend
 
 
       - backend-infrastructure:
-          # requires:
-          #   - audit-check-backend
+          requires:
+            - audit-check-backend
           filters:
             branches:
               only: master
