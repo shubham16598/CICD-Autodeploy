@@ -21,20 +21,20 @@
   become: true
   copy:
     src: /root/project/backend
-    dest: /root
+    dest: /home/ubuntu/
     force: no
 
 - name: "Install npm packages"
   become: true
   command: npm install
   args:
-    chdir: /root/backend
+    chdir: /home/ubuntu/backend
 
 - name: "Build"
   become: true
   command: npm run build
   args:
-    chdir: /root/backend
+    chdir: /home/ubuntu/backend
 
 - name: "Migrations"
   shell: |
@@ -50,4 +50,4 @@
   become: true
   command: pm2 start npm -- run "start:dev"
   args:
-    chdir: /root/backend/
+    chdir: /home/ubuntu/backend
