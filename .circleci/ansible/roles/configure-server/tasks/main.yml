@@ -3,11 +3,11 @@
   apt:
     upgrade: "yes"
 
-- name: "install dependencies."
-  become: true
-  apt:
-    name: ["nodejs", "npm"]
-    update_cache: yes
+- name: "install node 12.X"
+  shell: |
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    sudo apt -y upgrade
+    sudo apt install -y nodejs
 
 - name: "install pm2"
   become: true
@@ -17,24 +17,20 @@
     production: yes
     state: present
 
-- name: "Copy backend files"
-  become: true
+- name: "copy files from CircleCI to server"
   copy:
     src: /root/project/backend
-    dest: /home/ubuntu/
-    force: no
+    dest: /home/ubuntu
 
-- name: "Install npm packages"
-  become: true
-  command: npm install
-  args:
-    chdir: /home/ubuntu/backend
+- name: "install package dependencies"
+  shell: |
+    cd /home/ubuntu/backend    
+    npm install 
 
-- name: "Build"
-  become: true
-  command: npm run build
-  args:
-    chdir: /home/ubuntu/backend
+- name: "build package"
+  shell: |
+    cd /home/ubuntu/backend
+    npm run build
 
 - name: "Migrations"
   shell: |
@@ -46,8 +42,7 @@
 - debug:
     msg: "{{ migration_output.stdout_lines }}"
 
-- name: "Start Server"
-  become: true
-  command: pm2 start npm -- run "start:dev"
-  args:
-    chdir: /home/ubuntu/backend
+- name: "use pm2 to run the node server"
+  shell: |
+    cd /home/ubuntu/backend
+    pm2 start npm -- run "start:dev"
