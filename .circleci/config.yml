@@ -1,5 +1,18 @@
 version: 2.1
 
+commands:
+  rollback:
+    description: Deleting all instances
+    steps:
+      - run:
+          name: Delete all files in the current S3 bucket
+          command: |
+            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
+              --region us-east-2
+          when: on_fail
+
 jobs:
   hello-world:
     docker:
@@ -120,12 +133,7 @@ jobs:
                --request PUT \
                --data "${PUBLIC_DNS}" \
                https://api.memstash.io/values/public_dns
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
+      - rollback
       - run:
           name: Install tar/gzip utility
           command: |
@@ -160,14 +168,7 @@ jobs:
           root: ~/
           paths:
             - frontend.txt
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
+      - rollback
   add-backend-ip-to-inventory:
     docker:
       - image: amazon/aws-cli
@@ -198,14 +199,7 @@ jobs:
           root: ~/
           paths:
             - inventory.txt
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
+      - rollback
 
   config_backend_infrastructure:
     docker:
@@ -216,7 +210,7 @@ jobs:
           at: ~/
       - add_ssh_keys:
           fingerprints:
-            - "75:c1:d9:23:d3:93:a3:10:36:95:e2:c8:89:09:3a:19"
+            - "ad:e8:12:03:f2:ff:39:31:db:e5:62:74:0f:90:08:0e"
 
       - run:
           name: output of files
@@ -255,14 +249,7 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i ~/url.txt .circleci/ansible/playbook.yml
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2  
+      - rollback 
 
   deploy-frontend:
     docker:
@@ -290,14 +277,7 @@ jobs:
           name: S3 Bucket
           command: |
             aws s3 sync ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ 
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
+      - rollback
 
 
   smoke-test:
@@ -351,15 +331,7 @@ jobs:
               aws cloudformation delete-stack --stack-name frontend-${OLD_CIRCLE_WORKFLOW_ID}
               aws cloudformation delete-stack --stack-name backend-${OLD_CIRCLE_WORKFLOW_ID}
             fi
-      - run:
-          name: Rollback
-          when: on_fail
-          command: |
-            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
-            aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
-            aws cloudformation delete-stack --stack-name frontend-${CIRCLE_WORKFLOW_ID} \
-              --region us-east-2
+      - rollback
 
 workflows:
   default:
